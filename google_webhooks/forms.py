@@ -1,12 +1,6 @@
 from django import forms
 from datetime import datetime
 
-RESOURCE_STATES = (
-    ('sync', 'sync'),
-    ('exists', 'exists'),
-    ('not_exists', 'not_exists'),
-)
-
 class UnixDateTimeField(forms.DateTimeField):
     """Custom form field for parsing unix timestamps into datetimes"""
 
@@ -23,6 +17,6 @@ class WebhookForm(forms.Form):
     X_GOOG_CHANNEL_ID = forms.CharField()
     X_GOOG_CHANNEL_EXPIRATION = UnixDateTimeField(required=False)
     X_GOOG_CHANNEL_TOKEN = forms.CharField(required=False)
-    X_GOOG_RESOURCE_STATE = forms.ChoiceField(choices=RESOURCE_STATES)
+    X_GOOG_RESOURCE_STATE = forms.CharField()
     X_GOOG_RESOURCE_ID = forms.CharField()
     X_GOOG_RESOURCE_URI = forms.CharField()
