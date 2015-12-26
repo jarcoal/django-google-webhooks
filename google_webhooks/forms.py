@@ -11,6 +11,9 @@ class UnixDateTimeField(forms.DateTimeField):
     """Custom form field for parsing unix timestamps into datetimes"""
 
     def to_python(self, value):
+        if not isinstance(value, (str, float)):
+            return super(UnixDateTimeField, self).to_python(value)
+
         return datetime.fromtimestamp(value)
 
 class WebhookForm(forms.Form):
@@ -18,7 +21,7 @@ class WebhookForm(forms.Form):
 
     X_GOOG_MESSAGE_NUMBER = forms.IntegerField()
     X_GOOG_CHANNEL_ID = forms.CharField()
-    X_GOOG_CHANNEL_EXPIRATION = UnixDateTimeField(required=True)
+    X_GOOG_CHANNEL_EXPIRATION = UnixDateTimeField(required=False)
     X_GOOG_CHANNEL_TOKEN = forms.CharField(required=False)
     X_GOOG_RESOURCE_STATE = forms.ChoiceField(choices=RESOURCE_STATES)
     X_GOOG_RESOURCE_ID = forms.CharField()

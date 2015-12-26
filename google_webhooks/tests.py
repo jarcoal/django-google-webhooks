@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse_lazy
 from .signals import webhook_received
 from datetime import datetime
 from time import mktime
+import json
 
 webhook_url = reverse_lazy('google_webhook')
 
@@ -18,7 +19,34 @@ TEST_RESOURCE_URI = 'resource_uri'
 class TestWebhooks(TestCase):
     """"""
 
+    def test_required_field_validation(self):
+        """Test that required headers are validated"""
+
+        resp = self.client.post(webhook_url, {})
+        self.assertEqual(resp.status_code, 400)
+
+        errors = json.loads(resp.content.decode())
+        self.assertIn('X_GOOG_RESOURCE_STATE', errors)
+        self.assertIn('X_GOOG_RESOURCE_URI', errors)
+        self.assertIn('X_GOOG_RESOURCE_ID', errors)
+        self.assertIn('X_GOOG_MESSAGE_NUMBER', errors)
+        self.assertIn('X_GOOG_CHANNEL_ID', errors)
+
+    def test_optional_headers(self):
+        """Test that the optional headers are allowed to missing"""
+
+        resp = self.client.post(webhook_url, {},
+            X_GOOG_RESOURCE_STATE=TEST_RESOURCE_STATE,
+            X_GOOG_CHANNEL_ID=TEST_CHANNEL_ID,
+            X_GOOG_MESSAGE_NUMBER=TEST_MESSAGE_NUMBER,
+            X_GOOG_RESOURCE_ID=TEST_RESOURCE_ID,
+            X_GOOG_RESOURCE_URI=TEST_RESOURCE_URI,
+        )
+        self.assertEqual(resp.status_code, 200)
+
     def test_valid_webhook(self):
+        """Test to make sure the webhook triggers the webhook_received signal"""
+
         # if this isn't toggled to true by the signal, the test fails
         self.signal_fired = False
 
